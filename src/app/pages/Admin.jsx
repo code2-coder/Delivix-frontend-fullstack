@@ -70,7 +70,7 @@ export function Admin() {
       try {
         const [ordersRes, productsRes, bannersRes, categoriesRes] = await Promise.all([
           api.get("/admin/orders"),
-          api.get("/products"),
+          api.get("/admin/products"),
           api.get("/banners"),
           api.get("/categories")
         ]);
@@ -283,6 +283,7 @@ export function Admin() {
   }
 
   const handleDeleteProduct = async (id) => {
+      if (!window.confirm("Are you sure you want to permanently delete this product? This action cannot be undone.")) return;
       try {
           await api.delete(`/admin/products/${id}`);
           setProducts(products.filter(p => p._id !== id));
@@ -613,8 +614,12 @@ export function Admin() {
                       <td className="px-6 py-4">{product.category?.name || "Uncategorized"}</td>
                       <td className="px-6 py-4 font-semibold text-emerald-600">{formatINR(product.price)}</td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs ${product.stock > 10 ? "bg-green-100 text-green-800" : product.stock > 0 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}>
-                          {product.stock} units
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ring-1 ring-inset ${
+                          product.stock > 15 ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20" : 
+                          product.stock > 0 ? "bg-amber-50 text-amber-700 ring-amber-600/20" : 
+                          "bg-rose-50 text-rose-700 ring-rose-600/20"
+                        }`}>
+                          {product.stock === 0 ? "Out of Stock" : `${product.stock} Units`}
                         </span>
                       </td>
                       <td className="px-6 py-4">
