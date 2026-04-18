@@ -345,10 +345,29 @@ export function Header() {
                   Sign In
                 </Link>
                 <button 
-                  className="lg:hidden p-2 text-gray-700 hover:text-emerald-600"
-                  onClick={() => setIsMobileMenuOpen(true)}
+                  className="lg:hidden p-2 text-gray-700 hover:text-emerald-600 relative z-[110]"
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  aria-expanded={isMobileMenuOpen}
+                  aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                 >
-                  <Menu className="w-7 h-7" />
+                  {/* Animated Hamburger Icon */}
+                  <div className="relative w-7 h-7 flex flex-col justify-center items-center group">
+                    <span 
+                      className={`block absolute h-0.5 w-7 bg-current rounded-full transition-all duration-300 ease-in-out ${
+                        isMobileMenuOpen ? "rotate-45" : "-translate-y-2"
+                      }`}
+                    />
+                    <span 
+                      className={`block absolute h-0.5 w-7 bg-current rounded-full transition-all duration-300 ease-in-out ${
+                        isMobileMenuOpen ? "opacity-0" : "opacity-100"
+                      }`}
+                    />
+                    <span 
+                      className={`block absolute h-0.5 w-7 bg-current rounded-full transition-all duration-300 ease-in-out ${
+                        isMobileMenuOpen ? "-rotate-45" : "translate-y-2"
+                      }`}
+                    />
+                  </div>
                 </button>
               </div>
             )}
@@ -361,36 +380,29 @@ export function Header() {
         <div className="fixed inset-0 z-[100] lg:hidden">
           {/* Backdrop */}
           <div 
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-500"
             onClick={() => setIsMobileMenuOpen(false)}
           />
           
           {/* Content */}
-          <div className="absolute top-0 right-0 w-[300px] h-full bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
-            <div className="p-6 flex justify-between items-center border-b border-gray-50">
-              <span className="font-black text-xl text-emerald-600 uppercase tracking-tighter">Menu</span>
-              <button 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="Close menu"
-              >
-                <X className="w-6 h-6 text-gray-400" />
-              </button>
+          <div className="absolute top-0 right-0 w-[300px] sm:w-[350px] h-full bg-white shadow-2xl animate-in slide-in-from-right duration-500 ease-out flex flex-col">
+            <div className="p-8 flex justify-between items-center border-b border-gray-50/50">
+              <span className="font-black text-2xl text-emerald-600 uppercase tracking-tighter">Menu</span>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+            <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
               {/* Mobile Search */}
               <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Search</p>
-                <form onSubmit={handleSearch} className="relative">
+                <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Search Products</p>
+                <form onSubmit={handleSearch} className="relative group">
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Find products..."
-                    className="w-full bg-gray-100 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500/20"
+                    placeholder="Find premium items..."
+                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-sm focus:ring-4 focus:ring-emerald-500/10 transition-all"
                   />
-                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Search className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-emerald-500 transition-colors" />
                 </form>
               </div>
 
