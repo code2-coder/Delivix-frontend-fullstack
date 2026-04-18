@@ -86,12 +86,6 @@ export function Footer() {
             <ul className="space-y-5">
               <li className="flex items-start space-x-4 text-gray-400 group">
                 <div className="bg-slate-800/80 p-2 rounded-lg group-hover:bg-emerald-900/40 transition-colors border border-transparent group-hover:border-emerald-500/30">
-                   <Phone className="w-5 h-5 text-emerald-400" />
-                </div>
-                <span className="font-semibold text-gray-300 mt-1 hover:text-emerald-400 transition-colors cursor-pointer">+91 8767316759</span>
-              </li>
-              <li className="flex items-start space-x-4 text-gray-400 group">
-                <div className="bg-slate-800/80 p-2 rounded-lg group-hover:bg-emerald-900/40 transition-colors border border-transparent group-hover:border-emerald-500/30">
                    <Mail className="w-5 h-5 text-emerald-400" />
                 </div>
                 <span className="font-semibold text-gray-300 mt-1 hover:text-emerald-400 transition-colors cursor-pointer">support@delivix.in</span>
