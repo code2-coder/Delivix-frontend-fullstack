@@ -16,8 +16,16 @@ export function ProductCard({ product }) {
       <Link to={`/product/${product._id || product.id}`}>
         <div className="relative h-48 bg-gray-200 cursor-pointer">
           <img
-            src={(product.images && product.images[0]?.url) || product.image}
+            src={(() => {
+              const originalUrl = (product.images && product.images[0]?.url) || product.image;
+              // If it's a cloudinary URL, inject optimization params
+              if (originalUrl && originalUrl.includes("cloudinary.com")) {
+                return originalUrl.replace("/upload/", "/upload/f_auto,q_auto,w_500/");
+              }
+              return originalUrl;
+            })()}
             alt={product.name}
+            loading="lazy"
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
           />
 

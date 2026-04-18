@@ -10,6 +10,10 @@ import {
   ArrowLeft,
   Package,
   Truck,
+  Star,
+  User,
+  ThumbsUp,
+  Calendar,
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { toast } from "sonner";
@@ -103,12 +107,22 @@ export function ProductDetails() {
       const { data } = await api.get(`/products/${id}`);
       setProduct(data.product);
       setReviewComment("");
+      setReviewRating(5); // Reset to 5 stars
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to submit review");
     } finally {
       setIsSubmittingReview(false);
     }
   };
+
+  // Calculate rating stats
+  const ratingsCount = [0, 0, 0, 0, 0];
+  product?.reviews?.forEach(r => {
+    if (r.rating >= 1 && r.rating <= 5) {
+      ratingsCount[5 - r.rating]++;
+    }
+  });
+  const totalReviews = product?.reviews?.length || 0;
 
   if (!product) {
     return null;
@@ -324,71 +338,161 @@ export function ProductDetails() {
         )}
 
         {/* CUSTOMER REVIEWS SECTION */}
-        <div className="bg-white rounded-lg shadow-md p-8">
-           <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              
-              {/* Reviews List */}
-              <div className="md:col-span-2 space-y-6">
-                 {product.reviews && product.reviews.length > 0 ? (
-                    product.reviews.map(review => (
-                       <div key={review._id} className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0">
-                          <div className="flex items-center space-x-3 mb-2">
-                             <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-bold">
-                                {review.user?.name ? review.user.name.charAt(0).toUpperCase() : "U"}
-                             </div>
-                             <div>
-                                <p className="font-semibold text-gray-800">{review.user?.name || "Verified Customer"}</p>
-                                <div className="flex text-yellow-400">
-                                   {[...Array(5)].map((_, i) => (
-                                      <svg key={i} className={`w-3.5 h-3.5 ${i < review.rating ? "fill-current" : "text-gray-200 fill-current"}`} viewBox="0 0 20 20">
-                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                      </svg>
-                                   ))}
-                                </div>
-                             </div>
-                          </div>
-                          <p className="text-gray-600 pl-13">{review.comment}</p>
-                       </div>
-                    ))
-                 ) : (
-                    <div className="bg-gray-50 border border-gray-100 rounded-xl p-8 text-center text-gray-500">
-                       <p>Nobody has reviewed this product yet.</p>
-                       <p className="text-sm mt-1 text-gray-400">Be the first to share your thoughts!</p>
-                    </div>
-                 )}
+        <div id="reviews" className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-16">
+          <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Customer Reviews</h2>
+              <div className="flex items-center mt-2 space-x-3">
+                <div className="flex text-yellow-500">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className={`w-5 h-5 ${i < Math.round(product.ratings) ? "fill-current" : "text-gray-200 fill-current"}`} />
+                  ))}
+                </div>
+                <span className="text-lg font-bold text-gray-900">{product.ratings?.toFixed(1)} <span className="text-gray-400 font-normal">/ 5.0</span></span>
+                <span className="text-gray-400">•</span>
+                <span className="text-gray-600 font-medium">{totalReviews} reviews</span>
               </div>
+            </div>
+          </div>
 
-              {/* Review Submission Form */}
-              <div className="md:col-span-1 border border-gray-200 rounded-xl p-6 h-fit sticky top-24">
-                 <h3 className="font-semibold text-lg mb-4 text-gray-800">Add a Review</h3>
-                 {!user ? (
-                    <div className="bg-orange-50 border border-orange-100 rounded-lg p-4 text-center">
-                       <p className="text-orange-800 text-sm mb-3">You must be logged into a customer account to leave a verified review.</p>
-                       <button onClick={() => navigate("/login")} className="bg-orange-500 text-white w-full py-2 rounded-lg font-semibold hover:bg-orange-600">Secure Login</button>
+          <div className="grid grid-cols-1 lg:grid-cols-12">
+            {/* Rating Breakdown */}
+            <div className="lg:col-span-4 p-8 bg-gray-50/50 border-r border-gray-100">
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">Rating Distribution</h3>
+              <div className="space-y-4">
+                {ratingsCount.map((count, i) => {
+                  const stars = 5 - i;
+                  const percentage = totalReviews === 0 ? 0 : Math.round((count / totalReviews) * 100);
+                  return (
+                    <div key={stars} className="flex items-center space-x-4">
+                      <span className="text-sm font-bold text-gray-600 w-12">{stars} Stars</span>
+                      <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-emerald-500 rounded-full transition-all duration-1000" 
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-medium text-gray-400 w-12 text-right">{percentage}%</span>
                     </div>
-                 ) : (
-                    <div className="space-y-4">
-                       <div>
-                          <label className="block text-sm text-gray-600 mb-2">Your Rating</label>
-                          <select value={reviewRating} onChange={e => setReviewRating(Number(e.target.value))} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                             <option value="5">⭐⭐⭐⭐⭐ - 5 Stars</option>
-                             <option value="4">⭐⭐⭐⭐ - 4 Stars</option>
-                             <option value="3">⭐⭐⭐ - 3 Stars</option>
-                             <option value="2">⭐⭐ - 2 Stars</option>
-                             <option value="1">⭐ - 1 Star</option>
-                          </select>
-                       </div>
-                       <div>
-                          <label className="block text-sm text-gray-600 mb-2">Your Feedback</label>
-                          <textarea value={reviewComment} onChange={e => setReviewComment(e.target.value)} rows="4" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="What did you like or dislike?" />
-                       </div>
-                       <button onClick={submitReview} disabled={isSubmittingReview} className="w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-black disabled:bg-gray-400 transition-colors">
-                          {isSubmittingReview ? "Submitting..." : "Submit Review"}
-                       </button>
-                    </div>
-                 )}
+                  );
+                })}
               </div>
+              
+              <div className="mt-10 p-5 bg-white rounded-xl border border-gray-100 shadow-sm">
+                 <p className="text-sm text-gray-600 leading-relaxed italic">
+                    "Delivix customers love this product for its quality and speed of delivery."
+                 </p>
+              </div>
+            </div>
+
+            {/* Reviews List */}
+            <div className="lg:col-span-8 p-8">
+              <div className="space-y-8">
+                {product.reviews && product.reviews.length > 0 ? (
+                  product.reviews.map((review) => (
+                    <div key={review._id} className="group pb-8 border-b border-gray-100 last:border-0 last:pb-0">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-full flex items-center justify-center text-emerald-700 font-extrabold shadow-sm">
+                            {review.user?.name ? review.user.name.charAt(0).toUpperCase() : "U"}
+                          </div>
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <h4 className="font-bold text-gray-900">{review.user?.name || "Verified Customer"}</h4>
+                              <span className="bg-blue-50 text-blue-600 text-[10px] font-black uppercase px-1.5 py-0.5 rounded tracking-tighter">Verified</span>
+                            </div>
+                            <div className="flex text-yellow-400 mt-0.5">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? "fill-current" : "text-gray-100 fill-current"}`} />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center text-gray-400 text-xs">
+                           <Calendar className="w-3 h-3 mr-1" />
+                           <span>Recently Added</span>
+                        </div>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed font-medium pl-16">
+                        {review.comment}
+                      </p>
+                      <div className="mt-4 pl-16 flex items-center space-x-4">
+                         <button className="flex items-center space-x-1.5 text-xs font-bold text-gray-400 hover:text-emerald-600 transition-colors">
+                            <ThumbsUp className="w-4 h-4" />
+                            <span>Helpful (0)</span>
+                         </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-16 text-center border-2 border-dashed border-gray-200 rounded-3xl">
+                    <User className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-xl font-bold text-gray-900">No reviews yet</p>
+                    <p className="text-gray-500 mt-2 max-w-xs mx-auto text-sm">Be the pioneer who sets the standard for this product!</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* MODERN REVIEW SUBMISSION FORM */}
+        <div className="max-w-3xl mx-auto">
+           <div className="bg-white rounded-3xl shadow-xl shadow-emerald-900/5 p-10 border border-emerald-50">
+              <h2 className="text-2xl font-black text-gray-900 mb-8 text-center uppercase tracking-tight">Share Your Experience</h2>
+              
+              {!user ? (
+                <div className="bg-gray-50 rounded-2xl p-8 text-center border border-gray-100">
+                  <p className="text-gray-600 font-medium mb-6">Join the community to leave a verified review.</p>
+                  <button onClick={() => navigate("/login")} className="px-10 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all hover:scale-105 active:scale-95 shadow-lg shadow-gray-200">
+                    Sign In to Review
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                   <div className="flex flex-col items-center">
+                      <label className="text-sm font-bold text-gray-400 uppercase mb-4">Select Rating</label>
+                      <div className="flex space-x-2">
+                         {[1, 2, 3, 4, 5].map((s) => (
+                            <button
+                               key={s}
+                               onClick={() => setReviewRating(s)}
+                               onMouseEnter={() => {}} // Could add hover state logic
+                               className="focus:outline-none transition-transform hover:scale-125 active:scale-90"
+                            >
+                               <Star className={`w-10 h-10 ${s <= reviewRating ? "text-yellow-400 fill-current" : "text-gray-200"}`} />
+                            </button>
+                         ))}
+                      </div>
+                      <p className="mt-3 text-sm font-bold text-emerald-600">
+                         {reviewRating === 5 && "Exceeded my expectations!"}
+                         {reviewRating === 4 && "Highly recommended!"}
+                         {reviewRating === 3 && "It's a solid product."}
+                         {reviewRating === 2 && "Could be better."}
+                         {reviewRating === 1 && "Disappointing experience."}
+                      </p>
+                   </div>
+
+                   <div className="space-y-4">
+                      <label className="text-sm font-bold text-gray-900 uppercase block ml-1">Your detailed thoughts</label>
+                      <textarea 
+                        value={reviewComment} 
+                        onChange={e => setReviewComment(e.target.value)} 
+                        rows="5" 
+                        className="w-full bg-gray-50 border-0 rounded-2xl p-6 text-gray-900 placeholder:text-gray-400 focus:ring-4 focus:ring-emerald-500/10 transition-all text-lg font-medium" 
+                        placeholder="What makes this product special? (or what doesn't?)" 
+                      />
+                   </div>
+
+                   <button 
+                     onClick={submitReview} 
+                     disabled={isSubmittingReview} 
+                     className="w-full h-16 bg-emerald-600 text-white rounded-2xl font-black text-xl hover:bg-emerald-700 disabled:bg-gray-200 transition-all flex items-center justify-center shadow-xl shadow-emerald-500/20 active:scale-[0.98]"
+                   >
+                     {isSubmittingReview ? "Processing..." : "POST REVIEW"}
+                   </button>
+                </div>
+              )}
            </div>
         </div>
       </main>

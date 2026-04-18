@@ -18,9 +18,11 @@ export function Home() {
   const [products, setProducts] = useState([]);
   const { categories: contextCategories } = useCategory();
   const [categories, setCategories] = useState([{ name: "All", _id: "all", parentCategory: null }]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   
   const categoryScrollRef = useRef(null);
 
@@ -42,6 +44,8 @@ export function Home() {
     } else if (!searchParams.get("search")) {
       setSelectedCategory("All");
     }
+    setPage(1); // Reset page on category/search change
+    setProducts([]); // Clear products to force refresh
   }, [searchParams]);
 
   // Sync categories
@@ -51,28 +55,48 @@ export function Home() {
     }
   }, [contextCategories]);
 
-  // Fetch products mapped to Search Bar
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        setLoading(true);
+        if (page === 1) setLoading(true);
+        else setLoadingMore(true);
+
         const searchQuery = searchParams.get("search");
-        let url = `/products?limit=100`;
+        let url = `/products?limit=8&page=${page}`;
+        
         if (searchQuery) {
             url += `&keyword=${encodeURIComponent(searchQuery)}`;
         }
+
+        // Add category filter if not "All"
+        if (selectedCategory !== "All") {
+          const targetCat = contextCategories?.find(c => c.name === selectedCategory);
+          if (targetCat) {
+            url += `&category=${targetCat._id}`;
+          }
+        }
         
         const { data } = await api.get(url);
-        setProducts(data.products || []);
+        const newProducts = data.products || [];
+        
+        if (page === 1) {
+          setProducts(newProducts);
+        } else {
+          setProducts(prev => [...prev, ...newProducts]);
+        }
+        
+        setHasMore(newProducts.length === 8); // Assuming limit 8
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
     };
     
     fetchProducts();
-  }, [searchParams]);
+  }, [searchParams, selectedCategory, page, contextCategories]);
 
   useEffect(() => {
     const fetchBanners = async () => {
@@ -86,39 +110,11 @@ export function Home() {
     fetchBanners();
   }, []);
 
-  useEffect(() => {
-    let filtered = products;
-
-    // Apply strict category filtering locally while supporting parent->child structures
-    if (selectedCategory !== "All") {
-      const targetCat = contextCategories?.find(c => c.name === selectedCategory);
-       
-      if (targetCat) {
-        // Find all subcategories belonging to this selected category
-        const validCategoryNames = [
-          targetCat.name, 
-          ...(contextCategories?.filter(c => c.parentCategory === targetCat._id).map(c => c.name) || [])
-        ];
-        
-        const validCategoryIds = [
-          targetCat._id, 
-          ...(contextCategories?.filter(c => c.parentCategory === targetCat._id).map(c => c._id) || [])
-        ];
-
-        filtered = filtered.filter(p => 
-          validCategoryNames.includes(p.category) || 
-          validCategoryNames.includes(p.category?.name) ||
-          validCategoryIds.includes(p.category) ||
-          validCategoryIds.includes(p.category?._id)
-        );
-      } else {
-        // Fallback exact match
-        filtered = filtered.filter((p) => p.category === selectedCategory || p.category?.name === selectedCategory);
-      }
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMore) {
+      setPage(prev => prev + 1);
     }
-
-    setFilteredProducts(filtered);
-  }, [selectedCategory, products, contextCategories]);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -198,19 +194,38 @@ export function Home() {
                 : (selectedCategory === "All" ? "All Products" : selectedCategory)}
             </h3>
             <p className="text-gray-600">
-              {filteredProducts.length} products found
+              {products.length} products shown
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product._id || product.id} product={product} />
+            {products.map((product) => (
+              <ProductCard key={`${product._id || product.id}-${product.name}`} product={product} />
             ))}
           </div>
 
-          {filteredProducts.length === 0 && (
+          {!loading && products.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">No products found</p>
+            </div>
+          )}
+
+          {hasMore && products.length > 0 && (
+            <div className="mt-12 flex justify-center">
+               <button
+                 onClick={handleLoadMore}
+                 disabled={loadingMore}
+                 className="px-8 py-3 bg-white border-2 border-emerald-600 text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-colors disabled:opacity-50 flex items-center space-x-2"
+               >
+                 {loadingMore ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                      <span>Loading...</span>
+                    </>
+                 ) : (
+                    <span>Load More Products</span>
+                 )}
+               </button>
             </div>
           )}
         </div>

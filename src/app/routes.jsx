@@ -1,60 +1,76 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router";
-import { Home } from "./pages/Home";
-import { Login } from "./pages/Login";
-import { Register } from "./pages/Register";
-import { Cart } from "./pages/Cart";
-import { Orders } from "./pages/Orders";
-import { Account } from "./pages/Account";
-import { Admin } from "./pages/Admin";
-import { ProductDetails } from "./pages/ProductDetails";
+
+// Lazy load components
+const Home = lazy(() => import("./pages/Home").then(m => ({ default: m.Home })));
+const Login = lazy(() => import("./pages/Login").then(m => ({ default: m.Login })));
+const Register = lazy(() => import("./pages/Register").then(m => ({ default: m.Register })));
+const Cart = lazy(() => import("./pages/Cart").then(m => ({ default: m.Cart })));
+const Orders = lazy(() => import("./pages/Orders").then(m => ({ default: m.Orders })));
+const Account = lazy(() => import("./pages/Account").then(m => ({ default: m.Account })));
+const Admin = lazy(() => import("./pages/Admin").then(m => ({ default: m.Admin })));
+const ProductDetails = lazy(() => import("./pages/ProductDetails").then(m => ({ default: m.ProductDetails })));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail").then(m => ({ default: m.VerifyEmail })));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy").then(m => ({ default: m.PrivacyPolicy })));
+const TermsOfService = lazy(() => import("./pages/TermsOfService").then(m => ({ default: m.TermsOfService })));
+
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { VerifyEmail } from "./pages/VerifyEmail";
-import { PrivacyPolicy } from "./pages/PrivacyPolicy";
-import { TermsOfService } from "./pages/TermsOfService";
+
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
+
+const LazyComponent = ({ Component }) => (
+  <Suspense fallback={<LoadingFallback />}>
+    <Component />
+  </Suspense>
+);
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: Home,
+    element: <LazyComponent Component={Home} />,
   },
   {
     path: "/verify-email/:token",
-    Component: VerifyEmail,
+    element: <LazyComponent Component={VerifyEmail} />,
   },
   {
     path: "/privacy",
-    Component: PrivacyPolicy,
+    element: <LazyComponent Component={PrivacyPolicy} />,
   },
   {
     path: "/terms",
-    Component: TermsOfService,
+    element: <LazyComponent Component={TermsOfService} />,
   },
   {
     path: "/login",
-    Component: Login,
+    element: <LazyComponent Component={Login} />,
   },
   {
     path: "/register",
-    Component: Register,
+    element: <LazyComponent Component={Register} />,
   },
   {
     path: "/product/:id",
-    Component: ProductDetails,
+    element: <LazyComponent Component={ProductDetails} />,
   },
   {
-    path: "/cart", // Usually cart can be public but depends on requirement; letting it be public for now if guests can shop
-    Component: Cart,
+    path: "/cart",
+    element: <LazyComponent Component={Cart} />,
   },
   {
     Component: ProtectedRoute,
     children: [
       {
         path: "/orders",
-        Component: Orders,
+        element: <LazyComponent Component={Orders} />,
       },
       {
         path: "/account",
-        Component: Account,
+        element: <LazyComponent Component={Account} />,
       },
     ],
   },
@@ -63,7 +79,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/admin",
-        Component: Admin,
+        element: <LazyComponent Component={Admin} />,
       },
     ],
   },
