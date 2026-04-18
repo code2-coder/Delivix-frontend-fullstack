@@ -385,7 +385,7 @@ export function Header() {
           />
           
           {/* Content */}
-          <div className="absolute top-0 right-0 w-[300px] sm:w-[350px] h-full bg-white shadow-2xl animate-in slide-in-from-right duration-500 ease-out flex flex-col">
+          <div className="absolute top-0 right-0 w-[300px] sm:w-[350px] h-[100dvh] bg-white shadow-2xl animate-in slide-in-from-right duration-500 ease-out flex flex-col">
             <div className="p-8 flex justify-between items-center border-b border-gray-50/50">
               <span className="font-black text-2xl text-emerald-600 uppercase tracking-tighter">Menu</span>
             </div>
