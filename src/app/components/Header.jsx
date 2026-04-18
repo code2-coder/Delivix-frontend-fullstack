@@ -391,6 +391,18 @@ export function Header() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+              {/* BRAND LOGO IN DRAWER */}
+              <div className="pb-6 border-b border-gray-50">
+                 <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center space-x-3">
+                    <div className="bg-emerald-100 p-2.5 rounded-xl">
+                       <Package className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <span className="bg-gradient-to-r from-emerald-700 to-teal-500 text-transparent bg-clip-text font-black text-xl tracking-tighter uppercase">
+                       Delivix
+                    </span>
+                 </Link>
+              </div>
+
               {/* Mobile Search */}
               <div className="space-y-4">
                 <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Search Products</p>
@@ -398,6 +410,7 @@ export function Header() {
                   <input
                     type="text"
                     value={searchQuery}
+                    onFocus={() => searchQuery.trim().length >= 2 && setShowSearchDropdown(true)}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Find premium items..."
                     className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-sm focus:ring-4 focus:ring-emerald-500/10 transition-all"
@@ -408,50 +421,95 @@ export function Header() {
 
               {/* Mobile Categories */}
               <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Categories</p>
+                <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Browse Categories</p>
                 <div className="grid grid-cols-1 gap-2">
-                  {categories.filter(c => !c.parentCategory).slice(0, 8).map(cat => (
-                    <Link 
-                      key={cat._id}
-                      to={`/?category=${encodeURIComponent(cat.name)}`}
-                      className="flex items-center p-3 rounded-xl hover:bg-emerald-50 text-gray-700 font-bold text-sm transition-all"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Grid className="w-4 h-4 mr-3 text-emerald-500 opacity-50" />
-                      {cat.name}
-                    </Link>
-                  ))}
+                  {categories.length > 0 ? (
+                    categories.filter(c => !c.parentCategory).slice(0, 10).map(cat => (
+                      <Link 
+                        key={cat._id}
+                        to={`/?category=${encodeURIComponent(cat.name)}`}
+                        className="flex items-center justify-between p-4 rounded-2xl hover:bg-emerald-50 text-gray-700 font-bold text-sm transition-all border border-transparent hover:border-emerald-100 group"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <div className="flex items-center">
+                           <Grid className="w-4 h-4 mr-3 text-emerald-500 opacity-50 group-hover:opacity-100" />
+                           {cat.name}
+                        </div>
+                        <ChevronDown className="w-4 h-4 -rotate-90 opacity-20 group-hover:opacity-50 group-hover:translate-x-1 transition-all" />
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="text-xs text-gray-400 italic pl-1">Loading categories...</p>
+                  )}
                 </div>
               </div>
 
-              {/* Account Links (Mobile Only) */}
-              <div className="pt-4 border-t border-gray-50 space-y-4">
-                 {user && (
-                    <>
-                       <Link to="/account" className="flex items-center space-x-3 text-gray-700 font-bold p-2" onClick={() => setIsMobileMenuOpen(false)}>
-                          <User className="w-5 h-5 opacity-50" />
-                          <span>My Account</span>
+              {/* Account / User Section */}
+              <div className="pt-6 border-t border-gray-100 space-y-6">
+                 <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Your Account</p>
+                 {user ? (
+                    <div className="space-y-3">
+                       <Link 
+                          to="/account" 
+                          className="flex items-center space-x-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 hover:border-emerald-200 transition-all group"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                       >
+                          <div className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-emerald-600 font-black shadow-sm">
+                             {user.name[0].toUpperCase()}
+                          </div>
+                          <div className="flex-1">
+                             <p className="text-sm font-black text-gray-800 truncate">{user.name}</p>
+                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">Manage Profile</p>
+                          </div>
                        </Link>
+
+                       <Link 
+                          to="/orders" 
+                          className="flex items-center space-x-4 p-4 rounded-2xl hover:bg-emerald-50 text-gray-700 font-bold text-sm transition-all"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                       >
+                          <Package className="w-5 h-5 opacity-40" />
+                          <span>My Orders</span>
+                       </Link>
+
                        {isAdmin && (
-                          <Link to="/admin" className="flex items-center space-x-3 text-gray-700 font-bold p-2" onClick={() => setIsMobileMenuOpen(false)}>
-                             <LayoutDashboard className="w-5 h-5 opacity-50" />
-                             <span>Dashboard</span>
+                          <Link 
+                             to="/admin" 
+                             className="flex items-center space-x-4 p-4 rounded-2xl hover:bg-purple-50 text-purple-700 font-bold text-sm transition-all"
+                             onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                             <LayoutDashboard className="w-5 h-5 opacity-40" />
+                             <span>Admin Dashboard</span>
                           </Link>
                        )}
+
                        <button 
                          onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
-                         className="flex items-center space-x-3 text-red-500 font-bold p-2 w-full text-left"
+                         className="flex items-center space-x-4 p-4 rounded-2xl hover:bg-red-50 text-red-500 font-bold text-sm transition-all w-full text-left"
                        >
-                          <LogOut className="w-5 h-5 opacity-50" />
+                          <LogOut className="w-5 h-5 opacity-40" />
                           <span>Sign Out</span>
                        </button>
-                    </>
+                    </div>
+                 ) : (
+                    <div className="space-y-4">
+                       <Link 
+                          to="/login" 
+                          className="flex items-center justify-center p-4 rounded-2xl bg-emerald-600 text-white font-black text-sm shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                       >
+                          Sign In to Delivix
+                       </Link>
+                       <p className="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest px-4">
+                          Join our community for faster checkout and exclusive offers
+                       </p>
+                    </div>
                  )}
               </div>
             </div>
             
-            <div className="p-6 bg-gray-50 text-center">
-               <p className="text-xs text-gray-400 font-medium">© 2024 Delivix Premium</p>
+            <div className="p-8 bg-gray-50 text-center rounded-t-[40px] border-t border-gray-100">
+               <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">© 2024 Delivix Premium</p>
             </div>
           </div>
         </div>
