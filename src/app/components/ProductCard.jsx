@@ -48,17 +48,17 @@ export function ProductCard({ product }) {
           </h3>
         </Link>
         <p className="text-gray-600 text-sm mb-2">{product.description}</p>
-        <div className="flex items-center justify-between">
-          <span className="text-emerald-600 font-bold text-xl">
-            ₹{product.price.toFixed(2)}
+        <div className="flex items-center justify-between mt-auto">
+          <span className="text-emerald-700 font-black text-2xl tracking-tighter">
+            ₹{product.price.toFixed(0)}
           </span>
           <button
             onClick={handleAddToCart}
             disabled={product.stock === 0}
-            className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center space-x-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            aria-label={`Add ${product.name} to cart`}
+            className="h-12 w-12 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-500/20 disabled:bg-gray-200 disabled:shadow-none transition-all active:rotate-12 active:scale-90"
           >
-            <ShoppingCart className="w-4 h-4" />
-            <span>Add</span>
+            <ShoppingCart className="w-5 h-5" />
           </button>
         </div>
       </div>

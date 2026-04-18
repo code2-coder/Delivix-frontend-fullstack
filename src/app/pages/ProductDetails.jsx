@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { ProductCard } from "../components/ProductCard";
 import { useAuth } from "../context/AuthContext";
 import { useSEO } from "../hooks/useSEO";
+import { ProductSchema } from "../components/ProductSchema";
 
 export function ProductDetails() {
   const { id } = useParams();
@@ -87,7 +88,12 @@ export function ProductDetails() {
 
   useSEO(
      product ? product.name : "Loading Product...",
-     product ? `${product.name} - ${product.description.substring(0, 150)}...` : "Premium Tech Product"
+     product ? `${product.name} - ${product.description.substring(0, 150)}...` : "Premium Tech Product",
+     { 
+       image: product?.images?.[0]?.url || product?.image, 
+       type: "product",
+       keywords: product ? `${product.name}, tech, hardware, Delivix` : "tech, hardware"
+     }
   );
 
   const submitReview = async () => {
@@ -131,6 +137,7 @@ export function ProductDetails() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      <ProductSchema product={product} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button

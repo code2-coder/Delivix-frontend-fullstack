@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
-import { User, Mail, Shield, Package, ShoppingCart, Lock, Trash2, Edit3, Save, X } from "lucide-react";
+import { User, Mail, Shield, Package, ShoppingCart, Lock, Edit3, Save, X, Phone, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import api from "../api/axios";
 import { useSEO } from "../hooks/useSEO";
@@ -15,7 +15,7 @@ export function Account() {
 
   // Profile Edit State
   const [isEditing, setIsEditing] = useState(false);
-  const [profileForm, setProfileForm] = useState({ name: "", email: "" });
+  const [profileForm, setProfileForm] = useState({ name: "", email: "", phoneNumber: "", address: "" });
 
   // Password State
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -29,7 +29,12 @@ export function Account() {
     if (!user) {
       navigate("/login");
     } else {
-      setProfileForm({ name: user.name, email: user.email });
+      setProfileForm({ 
+        name: user.name, 
+        email: user.email,
+        phoneNumber: user.phoneNumber || "",
+        address: user.address || ""
+      });
     }
   }, [user, navigate]);
 
@@ -41,6 +46,12 @@ export function Account() {
   const handleUpdateProfile = async () => {
     if(!profileForm.name || !profileForm.email) {
        return toast.error("Name and Email cannot be empty.");
+    }
+    if(profileForm.phoneNumber && profileForm.phoneNumber.length > 15) {
+       return toast.error("Phone number cannot exceed 15 characters.");
+    }
+    if(profileForm.address && profileForm.address.length > 200) {
+       return toast.error("Address cannot exceed 200 characters.");
     }
     try {
       await api.put("/me/update", profileForm);
@@ -72,27 +83,6 @@ export function Account() {
     }
   };
 
-  //
-  // 🗑️ Handle Self Account Deletion
-  //
-  const handleDeleteAccount = async () => {
-    const isConfirmed = window.confirm(
-      "CRITICAL WARNING: This action cannot be undone. Are you absolutely sure you wish to delete your account permanently?"
-    );
-    if (!isConfirmed) return;
-
-    try {
-      await api.delete("/me");
-      toast.success("Account deleted. We are sorry to see you go!");
-      setTimeout(() => {
-         logout();
-         navigate("/");
-      }, 1500);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Could not delete account.");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900 selection:bg-emerald-200">
       <Header />
@@ -119,7 +109,7 @@ export function Account() {
                           <Edit3 className="w-4 h-4"/><span>Edit</span>
                        </button>
                    ) : (
-                       <button onClick={() => {setIsEditing(false); setProfileForm({name: user.name, email: user.email})}} className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 bg-gray-100 px-4 py-2 rounded-lg transition-colors">
+                       <button onClick={() => {setIsEditing(false); setProfileForm({name: user.name, email: user.email, phoneNumber: user.phoneNumber || "", address: user.address || ""})}} className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 bg-gray-100 px-4 py-2 rounded-lg transition-colors">
                           <X className="w-4 h-4"/><span>Cancel</span>
                        </button>
                    )}
@@ -127,20 +117,32 @@ export function Account() {
 
                 {isEditing ? (
                    <div className="space-y-6 animate-in slide-in-from-top-4 fade-in duration-300 bg-gray-50 p-6 rounded-xl border border-gray-100">
-                      <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
-                          <input type="text" value={profileForm.name} onChange={e => setProfileForm({...profileForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border-gray-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow shadow-sm" />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div>
+                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
+                             <input type="text" value={profileForm.name} onChange={e => setProfileForm({...profileForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border-gray-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow shadow-sm" />
+                         </div>
+                         <div>
+                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+                             <input type="email" value={profileForm.email} onChange={e => setProfileForm({...profileForm, email: e.target.value})} className="w-full px-4 py-3 rounded-xl border-gray-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow shadow-sm" />
+                         </div>
                       </div>
-                      <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
-                          <input type="email" value={profileForm.email} onChange={e => setProfileForm({...profileForm, email: e.target.value})} className="w-full px-4 py-3 rounded-xl border-gray-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow shadow-sm" />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div>
+                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Mobile Number</label>
+                             <input type="text" placeholder="+91 XXXXX XXXXX" value={profileForm.phoneNumber} onChange={e => setProfileForm({...profileForm, phoneNumber: e.target.value})} className="w-full px-4 py-3 rounded-xl border-gray-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow shadow-sm" />
+                         </div>
+                         <div>
+                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Address</label>
+                             <input type="text" placeholder="Building, Street, City" value={profileForm.address} onChange={e => setProfileForm({...profileForm, address: e.target.value})} className="w-full px-4 py-3 rounded-xl border-gray-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow shadow-sm" />
+                         </div>
                       </div>
                       <button onClick={handleUpdateProfile} className="w-full bg-emerald-600 text-white font-semibold py-3 rounded-lg hover:bg-emerald-700 shadow-sm flex justify-center items-center space-x-2 mt-4">
                          <Save className="w-5 h-5"/><span>Save Changes</span>
                       </button>
                    </div>
                 ) : (
-                   <div className="space-y-6">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
                       <div className="flex items-center space-x-4">
                          <div className="bg-emerald-100 p-3 rounded-full text-emerald-600">
                             <User className="w-6 h-6" />
@@ -159,6 +161,28 @@ export function Account() {
                             <p className="text-lg font-semibold text-gray-800">{user.email}</p>
                          </div>
                       </div>
+                      {user.phoneNumber && (
+                        <div className="flex items-center space-x-4">
+                           <div className="bg-orange-100 p-3 rounded-full text-orange-600">
+                              <Phone className="w-6 h-6" />
+                           </div>
+                           <div>
+                              <p className="text-sm text-gray-500">Mobile Number</p>
+                              <p className="text-lg font-semibold text-gray-800">{user.phoneNumber}</p>
+                           </div>
+                        </div>
+                      )}
+                      {user.address && (
+                        <div className="flex items-center space-x-4">
+                           <div className="bg-teal-100 p-3 rounded-full text-teal-600">
+                              <MapPin className="w-6 h-6" />
+                           </div>
+                           <div>
+                              <p className="text-sm text-gray-500">Address</p>
+                              <p className="text-lg font-semibold text-gray-800 truncate max-w-[200px]">{user.address}</p>
+                           </div>
+                        </div>
+                      )}
                       <div className="flex items-center space-x-4">
                          <div className="bg-purple-100 p-3 rounded-full text-purple-600">
                             <Shield className="w-6 h-6" />
@@ -205,15 +229,6 @@ export function Account() {
                 )}
              </div>
 
-             {/* DANGER ZONE */}
-             <div className="bg-gradient-to-br from-red-50 to-orange-50 border border-red-100 rounded-2xl p-8 mb-8 lg:mb-0 shadow-lg shadow-red-100/50 relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 w-64 h-64 bg-red-500 w-full rounded-full mix-blend-multiply filter blur-3xl opacity-5 -translate-y-1/2 translate-x-1/2 group-hover:opacity-10 transition-opacity duration-700"></div>
-                 <h3 className="text-xl font-bold text-red-700 flex items-center space-x-2 mb-3 relative z-10"><Trash2 className="w-5 h-5"/><span>Danger Zone</span></h3>
-                 <p className="text-red-800/80 mb-6 font-medium relative z-10">Once you delete your account, there is no going back. All your preferences and access will be immediately terminated.</p>
-                 <button onClick={handleDeleteAccount} className="bg-red-600 text-white font-bold py-3.5 px-6 rounded-xl hover:bg-red-700 hover:shadow-red-500/30 hover:shadow-lg transition-all duration-300 relative z-10">
-                    Delete Account Permanently
-                 </button>
-             </div>
           </div>
 
           {/* RIGHT COLUMN: Quick Links */}
