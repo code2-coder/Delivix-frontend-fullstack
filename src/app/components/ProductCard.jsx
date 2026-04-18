@@ -12,7 +12,7 @@ export function ProductCard({ product }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow animate-fade-in">
       <Link to={`/product/${product._id || product.id}`}>
         <div className="relative h-48 bg-gray-200 cursor-pointer">
           <img

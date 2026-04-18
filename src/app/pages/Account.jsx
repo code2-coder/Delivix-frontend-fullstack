@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
-import { User, Mail, Shield, Package, ShoppingCart, Lock, Edit3, Save, X, Phone, MapPin } from "lucide-react";
+import { User, Mail, Shield, Package, ShoppingCart, Lock, Edit3, Save, X, Phone, MapPin, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import api from "../api/axios";
 import { useSEO } from "../hooks/useSEO";
@@ -274,6 +274,22 @@ export function Account() {
                         </div>
                     </button>
                   )}
+                  
+                  {/* Sidebar Logout Button */}
+                  <button
+                    onClick={logout}
+                    className="w-full flex justify-between items-center p-4 rounded-xl border border-red-100 hover:border-red-200 hover:bg-red-50 hover:shadow-sm transition-all duration-300 group mt-4"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-red-100 p-2 rounded-lg text-red-600 group-hover:bg-red-200 transition-colors">
+                        <LogOut className="w-5 h-5" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-red-600 group-hover:text-red-700 transition-colors">Sign Out</p>
+                        <p className="text-xs text-red-400">Exit your session</p>
+                      </div>
+                    </div>
+                  </button>
                 </div>
              </div>
           </div>

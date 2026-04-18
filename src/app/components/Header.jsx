@@ -313,11 +313,20 @@ export function Header() {
                 </Link>
                 <Link
                   to="/account"
-                  className="hidden sm:flex items-center space-x-1.5 text-gray-600 hover:text-emerald-600 font-semibold transition-colors bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100 hover:border-emerald-200"
+                  className="hidden sm:flex items-center space-x-1.5 text-gray-600 hover:text-emerald-600 font-semibold transition-all duration-300 bg-gray-100/50 px-3 py-1.5 rounded-xl border border-gray-100 hover:border-emerald-200"
                 >
                   <User className="w-5 h-5" />
                   <span className="hidden sm:inline pt-0.5">{user.name.split(" ")[0]}</span>
                 </Link>
+
+                {/* Logout Button (Desktop) */}
+                <button
+                  onClick={handleLogout}
+                  className="hidden sm:flex items-center space-x-1.5 text-red-500 hover:text-red-600 font-semibold transition-all duration-300 bg-red-50 px-3 py-1.5 rounded-xl border border-red-100 hover:border-red-200"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
                 
                 {/* Mobile Menu Trigger */}
                 <button 

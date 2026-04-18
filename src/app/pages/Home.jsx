@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import api from "../api/axios";
 import { useSEO } from "../hooks/useSEO";
 import { useCategory } from "../context/CategoryContext";
+import { shuffleArray } from "../utils/helpers";
 
 export function Home() {
   useSEO("Home", "Browse Delivix's expansive offering of highly-rated tech products, hardware essentials, and premium gadgets.");
@@ -63,7 +64,8 @@ export function Home() {
         else setLoadingMore(true);
 
         const searchQuery = searchParams.get("search");
-        let url = `/products?limit=8&page=${page}`;
+        // Increase limit to 14 to provide a pool for randomization
+        let url = `/products?limit=14&page=${page}`;
         
         if (searchQuery) {
             url += `&keyword=${encodeURIComponent(searchQuery)}`;
@@ -78,15 +80,18 @@ export function Home() {
         }
         
         const { data } = await api.get(url);
-        const newProducts = data.products || [];
+        let newProducts = data.products || [];
         
+        // Randomize the initial load (Page 1)
         if (page === 1) {
+          newProducts = shuffleArray(newProducts).slice(0, 8);
           setProducts(newProducts);
         } else {
           setProducts(prev => [...prev, ...newProducts]);
         }
         
-        setHasMore(newProducts.length === 8); // Assuming limit 8
+        // Final displayed count determines if more are available
+        setHasMore(newProducts.length >= 8); 
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
